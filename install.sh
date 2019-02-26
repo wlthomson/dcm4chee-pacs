@@ -31,19 +31,17 @@ docker pull $POSTGRES_IMAGE
 docker pull $DCM4CHEE_IMAGE
 docker pull $DCM4CHE_TOOLS_IMAGE
 
-# DCM4CHEE tools.
-DCM4CHEE_TOOLS_TAG=5.15.1
+# Remove any existing containers.
+docker container stop $(docker container ls | grep $LDAP_CONTAINER | awk '{print $1}') > /dev/null 2>&1
+docker container stop $(docker container ls | grep $POSTGRES_CONTAINER | awk '{print $1}') > /dev/null 2>&1
+docker container stop $(docker container ls | grep $DCM4CHEE_CONTAINER | awk '{print $1}') > /dev/null 2>&1
 
-# Download dcm4chee images.
-docker pull dcm4che/dcm4chee-arc-psql:$DCM4CHEE_TAG
-docker pull dcm4che/postgres-dcm4chee:$POSTGRES_TAG
-docker pull dcm4che/slapd-dcm4chee:$LDAP_TAG
-docker pull dcm4che/dcm4che-tools:$DCM4CHEE_TOOLS_TAG
+docker container rm $(docker ps -a | grep $LDAP_CONTAINER | awk '{print $1}') > /dev/null 2>&1
+docker container rm $(docker ps -a | grep $POSTGRES_CONTAINER | awk '{print $1}') > /dev/null 2>&1
+docker container rm $(docker ps -a | grep $DCM4CHEE_CONTAINER | awk '{print $1}') > /dev/null 2>&1
 
-# Remove existing network, containers.
-docker network rm $(docker network ls | grep $BRIDGE_NET | awk '{print $1}')
-docker container stop $(docker container ls | grep "dcm4che" | awk '{print $1}')
-docker container rm $(docker container ls | grep "dcm4che" | awk '{print $1}')
+# Remove any existing bridge network.
+docker network rm $(docker network ls | grep $BRIDGE_NET | awk '{print $1}') > /dev/null 2>&1
 
 # Create bridge network.
 docker network create $BRIDGE_NET
