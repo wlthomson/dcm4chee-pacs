@@ -1,22 +1,35 @@
 #!/usr/bin/env bash
 
-# Bridge network.
-BRIDGE_NET=dcmchee_default
-
-# LDAP.
 LDAP_TAG=2.4.44-16.0
-LDAP_CONTAINER=ldap
-
-# Postgres.
 POSTGRES_TAG=11.1-15
+DCM4CHEE_TAG=5.15.1
+DCM4CHE_TOOLS_TAG=5.15.1
+
+LDAP_NAME=slapd-dcm4chee
+POSTGRES_NAME=postgres-dcm4chee
+DCM4CHEE_NAME=dcm4chee-arc-psql
+DCM4CHE_TOOLS_NAME=dcm4che-tools
+
+LDAP_IMAGE=dcm4che/$LDAP_NAME:$LDAP_TAG
+POSTGRES_IMAGE=dcm4che/$POSTGRES_NAME:$POSTGRES_TAG
+DCM4CHEE_IMAGE=dcm4che/$DCM4CHEE_NAME:$DCM4CHEE_TAG
+DCM4CHE_TOOLS_IMAGE=dcm4che/$DCM4CHE_TOOLS_NAME:$DCM4CHE_TOOLS_TAG
+
+LDAP_CONTAINER=ldap
 POSTGRES_CONTAINER=db
+DCM4CHEE_CONTAINER=arc
+
 POSTGRES_DB=pacsdb
 POSTGRES_USER=pacs
 POSTGRES_PASSWORD=pacs
 
-# DCM4CHEE.
-DCM4CHEE_TAG=5.15.1
-DCM4CHEE_CONTAINER=arc
+BRIDGE_NET=dcmchee_default
+
+# Download or update dcm4chee images.
+docker pull $LDAP_IMAGE
+docker pull $POSTGRES_IMAGE
+docker pull $DCM4CHEE_IMAGE
+docker pull $DCM4CHE_TOOLS_IMAGE
 
 # DCM4CHEE tools.
 DCM4CHEE_TOOLS_TAG=5.15.1
@@ -44,7 +57,7 @@ docker network create $BRIDGE_NET
            -v /etc/localtime:/etc/localtime:ro \
            -v /etc/timezone:/etc/timezone:ro \
            -v /var/local/dcm4chee-arc/db:/var/lib/postgresql/data \
-           -d dcm4che/postgres-dcm4chee:$POSTGRES_TAG
+           -d $POSTGRES_IMAGE
 
 # Launch LDAP container.
 docker run --network=$BRIDGE_NET --name $LDAP_CONTAINER \
@@ -53,9 +66,9 @@ docker run --network=$BRIDGE_NET --name $LDAP_CONTAINER \
            -v /etc/timezone:/etc/timezone:ro \
            -v /var/local/dcm4chee-arc/ldap:/var/lib/ldap \
            -v /var/local/dcm4chee-arc/slapd.d:/etc/ldap/slapd.d \
-           -d dcm4che/slapd-dcm4chee:$LDAP_TAG
+           -d $LDAP_IMAGE
 
- # Launch dch4che container.
+# Launch dch4che container.
  docker run --network=$BRIDGE_NET --name $DCM4CHEE_CONTAINER \
            -p 8080:8080 \
            -p 8443:8443 \
@@ -69,10 +82,10 @@ docker run --network=$BRIDGE_NET --name $LDAP_CONTAINER \
            -v /etc/localtime:/etc/localtime:ro \
            -v /etc/timezone:/etc/timezone:ro \
            -v /var/local/dcm4chee-arc/wildfly:/opt/wildfly/standalone \
-           -d dcm4che/dcm4chee-arc-psql:$DCM4CHEE_TAG
+           -d $DCM4CHEE_IMAGE
 
    # Send CT data to the archive.
- docker run --rm --network=$BRIDGE_NET dcm4che/dcm4che-tools:$DCM4CHEE_TOOLS_TAG storescu \
+ docker run --rm --network=$BRIDGE_NET $DCM4CHE_TOOLS_IMAGE storescu \
 	-cDCM4CHEE@arc:11112 /opt/dcm4che/etc/testdata/dicom
 
  # Copy Weasis viewer config files.
