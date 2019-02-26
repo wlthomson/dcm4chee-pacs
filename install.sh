@@ -69,3 +69,7 @@ docker run --network=$BRIDGE_NET --name $LDAP_CONTAINER \
    # Send CT data to the archive.
  docker run --rm --network=$BRIDGE_NET dcm4che/dcm4che-tools:$DCM4CHEE_TOOLS_TAG storescu \
 	-cDCM4CHEE@arc:11112 /opt/dcm4che/etc/testdata/dicom
+
+ # Copy Weasis viewer config files.
+ docker cp ./weasis-pacs-connector.properties arc:/opt/wildfly/standalone/configuration/
+ docker cp ./dicom-dcm4chee-arc.properties arc:/opt/wildfly/standalone/configuration
