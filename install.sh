@@ -27,6 +27,11 @@ docker pull dcm4che/postgres-dcm4chee:$POSTGRES_TAG
 docker pull dcm4che/slapd-dcm4chee:$LDAP_TAG
 docker pull dcm4che/dcm4che-tools:$DCM4CHEE_TOOLS_TAG
 
+# Remove existing network, containers.
+docker network rm $(docker network ls | grep $BRIDGE_NET | awk '{print $1}')
+docker container stop $(docker container ls | grep "dcm4che" | awk '{print $1}')
+docker container rm $(docker container ls | grep "dcm4che" | awk '{print $1}')
+
 # Create bridge network.
 docker network create $BRIDGE_NET
 
