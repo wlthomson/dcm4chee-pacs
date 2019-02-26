@@ -25,6 +25,10 @@ POSTGRES_PASSWORD=pacs
 
 BRIDGE_NET=dcmchee_default
 
+WEASIS_DIR=weasis
+WEASIS_PACS_CONFIG=$WEASIS_DIR/weasis-pacs-connector.properties
+WEASIS_DICOM_CONFIG=$WEASIS_DIR/dicom-dcm4chee-arc.properties
+
 # Download or update dcm4chee images.
 docker pull $LDAP_IMAGE
 docker pull $POSTGRES_IMAGE
@@ -87,5 +91,5 @@ docker run --network=$BRIDGE_NET --name $LDAP_CONTAINER \
 	-cDCM4CHEE@arc:11112 /opt/dcm4che/etc/testdata/dicom
 
  # Copy Weasis viewer config files.
- docker cp ./weasis-pacs-connector.properties arc:/opt/wildfly/standalone/configuration/
- docker cp ./dicom-dcm4chee-arc.properties arc:/opt/wildfly/standalone/configuration
+ docker cp $WEASIS_PACS_CONFIG arc:/opt/wildfly/standalone/configuration/
+ docker cp $WEASIS_DICOM_CONFIG arc:/opt/wildfly/standalone/configuration/
