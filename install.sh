@@ -18,10 +18,14 @@ POSTGRES_PASSWORD=pacs
 DCM4CHEE_TAG=5.15.1
 DCM4CHEE_CONTAINER=arc
 
+# DCM4CHEE tools.
+DCM4CHEE_TOOLS_TAG=5.15.1
+
 # Download dcm4chee images.
 docker pull dcm4che/dcm4chee-arc-psql:$DCM4CHEE_TAG
 docker pull dcm4che/postgres-dcm4chee:$POSTGRES_TAG
 docker pull dcm4che/slapd-dcm4chee:$LDAP_TAG
+docker pull dcm4che/dcm4che-tools:$DCM4CHEE_TOOLS_TAG
 
 # Create bridge network.
 docker network create $BRIDGE_NET
@@ -61,3 +65,7 @@ docker run --network=$BRIDGE_NET --name $LDAP_CONTAINER \
            -v /etc/timezone:/etc/timezone:ro \
            -v /var/local/dcm4chee-arc/wildfly:/opt/wildfly/standalone \
            -d dcm4che/dcm4chee-arc-psql:$DCM4CHEE_TAG
+
+   # Send CT data to the archive.
+ docker run --rm --network=$BRIDGE_NET dcm4che/dcm4che-tools:$DCM4CHEE_TOOLS_TAG storescu \
+	-cDCM4CHEE@arc:11112 /opt/dcm4che/etc/testdata/dicom
