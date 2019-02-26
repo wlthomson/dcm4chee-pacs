@@ -51,7 +51,7 @@ docker network rm $(docker network ls | grep $BRIDGE_NET | awk '{print $1}') > /
 docker network create $BRIDGE_NET
 
 # Launch database container.
- docker run --network=$BRIDGE_NET --name $POSTGRES_CONTAINER \
+docker run --network=$BRIDGE_NET --name $POSTGRES_CONTAINER \
            -p 5432:5432 \
            -e POSTGRES_DB=$POSTGRES_DB \
            -e POSTGRES_USER=$POSTGRES_USER \
@@ -71,7 +71,7 @@ docker run --network=$BRIDGE_NET --name $LDAP_CONTAINER \
            -d $LDAP_IMAGE
 
 # Launch dch4che container.
- docker run --network=$BRIDGE_NET --name $DCM4CHEE_CONTAINER \
+docker run --network=$BRIDGE_NET --name $DCM4CHEE_CONTAINER \
            -p 8080:8080 \
            -p 8443:8443 \
            -p 9990:9990 \
@@ -86,10 +86,10 @@ docker run --network=$BRIDGE_NET --name $LDAP_CONTAINER \
            -v /var/local/dcm4chee-arc/wildfly:/opt/wildfly/standalone \
            -d $DCM4CHEE_IMAGE
 
-   # Send CT data to the archive.
- docker run --rm --network=$BRIDGE_NET $DCM4CHE_TOOLS_IMAGE storescu \
-	-cDCM4CHEE@arc:11112 /opt/dcm4che/etc/testdata/dicom
+# Send CT data to the archive.
+docker run --rm --network=$BRIDGE_NET $DCM4CHE_TOOLS_IMAGE storescu \
+       -cDCM4CHEE@arc:11112 /opt/dcm4che/etc/testdata/dicom
 
- # Copy Weasis viewer config files.
- docker cp $WEASIS_PACS_CONFIG arc:/opt/wildfly/standalone/configuration/
- docker cp $WEASIS_DICOM_CONFIG arc:/opt/wildfly/standalone/configuration/
+# Copy Weasis viewer config files.
+docker cp $WEASIS_PACS_CONFIG arc:/opt/wildfly/standalone/configuration/
+docker cp $WEASIS_DICOM_CONFIG arc:/opt/wildfly/standalone/configuration/
