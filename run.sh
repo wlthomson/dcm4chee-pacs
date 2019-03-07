@@ -25,6 +25,8 @@ POSTGRES_PASSWORD=pacs
 
 BRIDGE_NET=dcmchee_default
 
+DCM4CHEE_DIR=$HOME/dcm4chee-arc
+
 WEASIS_DIR=weasis
 WEASIS_PACS_CONFIG=$WEASIS_DIR/weasis-pacs-connector.properties
 WEASIS_DICOM_CONFIG=$WEASIS_DIR/dicom-dcm4chee-arc.properties
@@ -44,6 +46,9 @@ docker container rm $(docker ps -a | grep $LDAP_CONTAINER | awk '{print $1}') > 
 docker container rm $(docker ps -a | grep $POSTGRES_CONTAINER | awk '{print $1}') > /dev/null 2>&1
 docker container rm $(docker ps -a | grep $DCM4CHEE_CONTAINER | awk '{print $1}') > /dev/null 2>&1
 
+# Remove existing volumes.
+rm -rf $DCM4CHEE_DIR
+
 # Remove any existing bridge network.
 docker network rm $(docker network ls | grep $BRIDGE_NET | awk '{print $1}') > /dev/null 2>&1
 
@@ -56,18 +61,14 @@ docker run --network=$BRIDGE_NET --name $POSTGRES_CONTAINER \
            -e POSTGRES_DB=$POSTGRES_DB \
            -e POSTGRES_USER=$POSTGRES_USER \
            -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
-           -v /etc/localtime:/etc/localtime:ro \
-           -v /etc/timezone:/etc/timezone:ro \
-           -v /var/local/dcm4chee-arc/db:/var/lib/postgresql/data \
+           -v $DCM4CHEE_DIR/db:/var/lib/postgresql/data \
            -d $POSTGRES_IMAGE
 
 # Launch LDAP container.
 docker run --network=$BRIDGE_NET --name $LDAP_CONTAINER \
            -p 389:389 \
-           -v /etc/localtime:/etc/localtime:ro \
-           -v /etc/timezone:/etc/timezone:ro \
-           -v /var/local/dcm4chee-arc/ldap:/var/lib/ldap \
-           -v /var/local/dcm4chee-arc/slapd.d:/etc/ldap/slapd.d \
+           -v $DCM4CHEE_DIR/ldap:/var/lib/ldap \
+           -v $DCM4CHEE_DIR/slapd.d:/etc/ldap/slapd.d \
            -d $LDAP_IMAGE
 
 # Launch dch4che container.
@@ -81,9 +82,7 @@ docker run --network=$BRIDGE_NET --name $DCM4CHEE_CONTAINER \
            -e POSTGRES_USER=pacs \
            -e POSTGRES_PASSWORD=pacs \
            -e WILDFLY_WAIT_FOR="ldap:389 db:5432" \
-           -v /etc/localtime:/etc/localtime:ro \
-           -v /etc/timezone:/etc/timezone:ro \
-           -v /var/local/dcm4chee-arc/wildfly:/opt/wildfly/standalone \
+           -v $DCM4CHEE_DIR/wildfly:/opt/wildfly/standalone \
            -d $DCM4CHEE_IMAGE
 
 # Send CT data to the archive.
